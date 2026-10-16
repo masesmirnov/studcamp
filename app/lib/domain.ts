@@ -239,6 +239,7 @@ export interface BootstrapPayload {
   ui: {
     currentDay: number;
     totalDays: number;
+    timezone?: string;
   };
   lastSyncedAt: string;
 }

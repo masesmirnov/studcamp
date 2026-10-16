@@ -238,6 +238,7 @@ class ResourceSchema(BaseSchema):
 class UiStateSchema(BaseSchema):
     currentDay: int
     totalDays: int
+    timezone: str
 
 
 class ProjectTeamSchema(BaseSchema):

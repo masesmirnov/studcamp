@@ -119,6 +119,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         const message =
           nextError instanceof Error ? nextError.message : "Не удалось синхронизировать данные";
         if (cachedBootstrap) {
+          setData(normalizeBootstrap(cachedBootstrap));
           setStatus("authenticated");
           setSyncStatus("stale");
           setError(message);

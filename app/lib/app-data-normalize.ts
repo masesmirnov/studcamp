@@ -5,6 +5,7 @@
  * state-потоке и не перемешивался с capability-дефолтами и форматами.
  */
 import type { BootstrapPayload } from "./domain";
+import { resolveEventStatus } from "./events";
 
 export const DEFAULT_CAPABILITIES = {
   canManageAll: false,
@@ -39,6 +40,9 @@ export function normalizeBootstrap(bootstrap: BootstrapPayload): BootstrapPayloa
     },
     events: bootstrap.events.map((event) => ({
       ...event,
+      status: bootstrap.ui.timezone
+        ? resolveEventStatus(event, bootstrap.ui.timezone)
+        : event.status,
       teacherIds: event.teacherIds ?? [],
     })),
     adminUsers: bootstrap.adminUsers ?? [],

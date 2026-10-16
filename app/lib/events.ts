@@ -1,4 +1,50 @@
-import type { Event as CampEvent } from "./domain";
+import type { Event as CampEvent, EventStatus } from "./domain";
+
+function parseSeconds(value: string): number | null {
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!match) return null;
+  return Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3] ?? 0);
+}
+
+function localNow(timeZone: string, now: Date): { date: string; seconds: number } {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(now)
+      .map((part) => [part.type, part.value]),
+  );
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    seconds: Number(parts.hour) * 3600 + Number(parts.minute) * 60 + Number(parts.second),
+  };
+}
+
+export function resolveEventStatus(
+  event: Pick<CampEvent, "date" | "startAt" | "endAt" | "status">,
+  timeZone: string,
+  now: Date = new Date(),
+): EventStatus {
+  if (event.status === "changed" || event.status === "cancelled") return event.status;
+
+  const today = localNow(timeZone, now);
+  if (event.date < today.date) return "completed";
+  if (event.date > today.date) return "upcoming";
+
+  const start = parseSeconds(event.startAt);
+  const end = parseSeconds(event.endAt);
+  if (start === null || end === null) return event.status;
+  if (today.seconds < start) return "upcoming";
+  if (today.seconds > end) return "completed";
+  return "in_progress";
+}
 
 export interface SplitEventTitle {
   title: string;

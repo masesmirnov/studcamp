@@ -9,6 +9,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.app.core.config import settings
 from backend.app.models.entities import (
     Camp,
     CampusCategory,
@@ -207,6 +208,10 @@ def build_bootstrap(db: Session, user: User) -> BootstrapSchema:
         adminRoomAssignments=[
             _serialize_admin_room_assignment(assignment) for assignment in admin_room_assignments
         ],
-        ui=UiStateSchema(currentDay=resolve_current_day(camp), totalDays=camp.total_days),
+        ui=UiStateSchema(
+            currentDay=resolve_current_day(camp),
+            totalDays=camp.total_days,
+            timezone=settings.timezone,
+        ),
         lastSyncedAt=datetime.now(UTC),
     )
